@@ -469,15 +469,15 @@ Không request nào lỗi (Nginx có `proxy_next_upstream error timeout http_503
      ✅ Cost guard
      ✅ Config từ environment variables
      ✅ Structured logging
-     ⚠️  Graceful shutdown
+     ✅ Graceful shutdown
      ✅ Public URL ready (Railway / Render config)
 ----------------------------------------------------------------
-  Result: 11/12 tiêu chí đạt · 42/42 checks passed
-  ⚠️  Chưa kiểm tra được: Graceful shutdown
-  ❌ CHƯA ĐẠT — còn tiêu chí chưa kiểm tra được (⚠️). Chạy đầy đủ trên máy có Docker.
+  Result: 12/12 tiêu chí đạt · 43/43 checks passed
+  🎉 PASS 12/12 — PRODUCTION READY! Deploy nào!
+================================================================
 ```
 
-_Output trên chạy bằng Python Windows: mục ⚠️ là phần gửi SIGTERM lúc chạy uvicorn trực tiếp, Windows không làm được (phần `docker stop` của cùng tiêu chí đã ✅: exit code 0 trong 0,7 s). Cần chạy lại trong WSL2 để có `PASS 12/12` rồi thay khối này._
+_Chạy đầy đủ (có Docker) trong WSL2 Ubuntu, Python 3.12 trong venv, `python check_production_ready.py` từ thư mục `06-lab-complete/`._
 
 ---
 

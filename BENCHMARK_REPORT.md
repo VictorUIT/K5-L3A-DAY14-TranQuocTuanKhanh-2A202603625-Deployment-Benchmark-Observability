@@ -10,11 +10,11 @@
 
 ## 1. SLO của agent
 
-| SLI | SLO | Lý do chọn ngưỡng này |
-|---|---|---|
-| p95 latency `/ask` | < 500 ms | Mock LLM trả lời ~200 ms (p50 ≈ 200 ms đo được); 500 ms chừa ~2,5× headroom cho retrieval và mạng mà người dùng chat vẫn thấy "nhanh". Khớp `--slo-p95-ms` mặc định của `load_test.py`. |
-| Error rate `/ask` | < 2 % | Mock LLM có `MOCK_ERROR_RATE=1%` lỗi upstream không tránh được; 2% = gấp đôi mức nền làm error budget, vượt mức này là có sự cố thật. |
-| Accuracy trên golden dataset | ≥ 80 % (gate release); mục tiêu 100% | 80% là ngưỡng mặc định của `run_eval.py`. Bộ 23 câu đều là kiến thức trong knowledge base, nên sau khi sửa KB, đặt `--min-accuracy 1.0` để mọi câu sai đều chặn merge. |
+| SLI                           | SLO                                     | Lý do chọn ngưỡng này                                                                                                                                                                                        |
+| ----------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| p95 latency `/ask`          | < 500 ms                                | Mock LLM trả lời ~200 ms (p50 ≈ 200 ms đo được); 500 ms chừa ~2,5× headroom cho retrieval và mạng mà người dùng chat vẫn thấy "nhanh". Khớp `--slo-p95-ms` mặc định của `load_test.py`. |
+| Error rate `/ask`           | < 2 %                                   | Mock LLM có `MOCK_ERROR_RATE=1%` lỗi upstream không tránh được; 2% = gấp đôi mức nền làm error budget, vượt mức này là có sự cố thật.                                                     |
+| Accuracy trên golden dataset | ≥ 80 % (gate release); mục tiêu 100% | 80% là ngưỡng mặc định của `run_eval.py`. Bộ 23 câu đều là kiến thức trong knowledge base, nên sau khi sửa KB, đặt `--min-accuracy 1.0` để mọi câu sai đều chặn merge.               |
 
 ---
 
@@ -22,12 +22,12 @@
 
 ### 2.1 Concurrency vs latency (agent v2)
 
-| Concurrency | RPS | p50 (ms) | p95 (ms) | p99 (ms) | Error rate | SLO |
-|---|---|---|---|---|---|---|
-| 1 | 4.27 | 199.9 | 234.5 | 1683.2 | 1.00% | PASS |
-| 10 | 39.84 | 196.9 | 237.1 | 1695.7 | 0.67% | PASS |
-| 50 | 105.85 | 210.3 | 266.0 | 1722.6 | 0.67% | PASS |
-| 100 | 67.1 | 293.2 | 2685.8 | 3104.8 | 1.00% | FAIL (p95) |
+| Concurrency | RPS    | p50 (ms) | p95 (ms) | p99 (ms) | Error rate | SLO        |
+| ----------- | ------ | -------- | -------- | -------- | ---------- | ---------- |
+| 1           | 4.27   | 199.9    | 234.5    | 1683.2   | 1.00%      | PASS       |
+| 10          | 39.84  | 196.9    | 237.1    | 1695.7   | 0.67%      | PASS       |
+| 50          | 105.85 | 210.3    | 266.0    | 1722.6   | 0.67%      | PASS       |
+| 100         | 67.1   | 293.2    | 2685.8   | 3104.8   | 1.00%      | FAIL (p95) |
 
 Nguồn: `reports/load_v2_c{1,10,50,100}.json` (300 request mỗi mức).
 
@@ -40,10 +40,10 @@ Các request chậm ~1,7 s ở p99 tại mọi mức concurrency là tail latenc
 ### 2.2 Tail latency
 
 | `MOCK_SLOW_RATE` | avg (ms) | p95 (ms) | p99 (ms) |
-|---|---|---|---|
-| 0 | 191.9 | 232.8 | 241.9 |
-| 0.03 (mặc định) | 222.4 | 238.8 | 1691.3 |
-| 0.1 | 354.8 | 1682.0 | 1721.8 |
+| ------------------ | -------- | -------- | -------- |
+| 0                  | 191.9    | 232.8    | 241.9    |
+| 0.03 (mặc định) | 222.4    | 238.8    | 1691.3   |
+| 0.1                | 354.8    | 1682.0   | 1721.8   |
 
 Nguồn: `reports/load_v2_slow_{0,0.03,0.1}.json` (300 request, concurrency 20).
 
@@ -57,22 +57,22 @@ SLO không nên đặt theo average vì avg gộp đuôi chậm vào số đông
 
 ## 3. Benchmark chất lượng (develop, `eval/run_eval.py`)
 
-| Chỉ số | Agent v1 | Agent v2 | Agent v2 (sau khi sửa KB) |
-|---|---|---|---|
-| Accuracy | 4.35% (1/23) | 91.3% (21/23) | 100.0% (23/23) |
-| Avg tokens / câu | 55.9 | 109.1 | 117.6 |
-| Tổng cost (USD) | 0.000388 | 0.000762 | 0.000824 |
-| Cost / câu đúng (USD) | 0.00038775 | 0.00003627 | 0.00003583 |
-| Quality gate | FAIL (accuracy < 80%) | PASS (≥ 80%, 0 regression so với v1) | PASS (`--min-accuracy 1.0`, 0 regression so với v2) |
+| Chỉ số                 | Agent v1              | Agent v2                               | Agent v2 (sau khi sửa KB)                             |
+| ------------------------ | --------------------- | -------------------------------------- | ------------------------------------------------------ |
+| Accuracy                 | 4.35% (1/23)          | 91.3% (21/23)                          | 100.0% (23/23)                                         |
+| Avg tokens / câu        | 55.9                  | 109.1                                  | 117.6                                                  |
+| Tổng cost (USD)         | 0.000388              | 0.000762                               | 0.000824                                               |
+| Cost / câu đúng (USD) | 0.00038775            | 0.00003627                             | 0.00003583                                             |
+| Quality gate             | FAIL (accuracy < 80%) | PASS (≥ 80%, 0 regression so với v1) | PASS (`--min-accuracy 1.0`, 0 regression so với v2) |
 
 Nguồn: `reports/eval_v1.json`, `reports/eval_v2.json`, `reports/eval_v2_fixed.json`.
 
 **Những câu v2 trả lời sai ban đầu và cách bạn sửa:**
 
-| ID | Keyword bị thiếu | Bạn đã sửa gì |
-|---|---|---|
-| security-02 ("JWT khác gì API key trong xác thực?") | `token`, `hết hạn`, `chữ ký` | KB chưa có tài liệu nào về JWT nên retrieval trả về rỗng, LLM trả câu chung chung. Thêm entry vào `KNOWLEDGE_BASE` với từ khoá kích hoạt `jwt`, `api key`, `xác thực`, nội dung giải thích JWT là token tự chứa, server kiểm chữ ký, có thời điểm hết hạn (claim `exp`), khác API key cố định. |
-| scaling-03 ("Kubernetes HPA scale dựa trên những chỉ số nào?") | `cpu`, `memory`, `custom metrics` | Tương tự, KB không có tài liệu về HPA. Thêm entry kích hoạt bởi `kubernetes`, `hpa`, `autoscal`: HPA scale theo CPU, memory utilization hoặc custom metrics. |
+| ID                                                                   | Keyword bị thiếu                      | Bạn đã sửa gì                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| security-02 ("JWT khác gì API key trong xác thực?")              | `token`, `hết hạn`, `chữ ký`  | KB chưa có tài liệu nào về JWT nên retrieval trả về rỗng, LLM trả câu chung chung. Thêm entry vào `KNOWLEDGE_BASE` với từ khoá kích hoạt `jwt`, `api key`, `xác thực`, nội dung giải thích JWT là token tự chứa, server kiểm chữ ký, có thời điểm hết hạn (claim `exp`), khác API key cố định. |
+| scaling-03 ("Kubernetes HPA scale dựa trên những chỉ số nào?") | `cpu`, `memory`, `custom metrics` | Tương tự, KB không có tài liệu về HPA. Thêm entry kích hoạt bởi `kubernetes`, `hpa`, `autoscal`: HPA scale theo CPU, memory utilization hoặc custom metrics.                                                                                                                                                                  |
 
 Trước khi thêm, đã grep `golden_dataset.jsonl` để chắc các từ khoá kích hoạt mới chỉ xuất hiện trong đúng 2 câu này, không "cướp" retrieval của câu khác (eval cuối báo 0 regression). Không sửa `golden_dataset.jsonl`. Đã chép bản sửa sang `production/utils/mock_llm.py` để stack Docker dùng cùng KB.
 
@@ -109,17 +109,18 @@ Unit test alert rules: `promtool test rules alert_rules_test.yml` → `SUCCESS`.
 
 ### 4.2 Thí nghiệm "phá hệ thống"
 
-| # | Thay đổi | Alert nào firing | Thời gian từ lúc đổi → firing | Panel nào phản ánh rõ nhất |
-|---|---|---|---|---|
-| A | `MOCK_ERROR_RATE=0.2` | `AgentHighErrorRate` | 91 s (pending ở +31 s, + `for: 1m`) | Error rate (lên 18,9%) |
-| B | `MOCK_SLOW_RATE=0.3` | `AgentHighLatencyP95` | 152 s (pending ở +31 s, + `for: 2m`) | p50/p95/p99 theo thời gian: p95 1917 ms, p99 1983 ms nhưng avg chỉ 640 ms |
-| C | `LLM_MODEL=mock-llm-large` | `LLMCostBurnRateHigh` | 147 s (pending ở ~+21 s, + `for: 2m`) | Cost USD/giờ: 2,50 → 36,0 (×14,4); LLM p95 197 → 494 ms (×2,5) |
-| D | `docker pause` 1 instance | `AgentInstanceDown` | 45 s (pending ở +15 s, + `for: 30s`) | Instances up (2 → 1); `up{instance="172.22.0.8:8000"} = 0` |
-| E | `AGENT_VERSION=v1` | Không có | — | Retrieval hit ratio (100% → không còn series), tokens/s (input 1441 → 667), bảng version (v2 → v1) |
+| # | Thay đổi                   | Alert nào firing       | Thời gian từ lúc đổi → firing      | Panel nào phản ánh rõ nhất                                                                          |
+| - | ---------------------------- | ----------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| A | `MOCK_ERROR_RATE=0.2`      | `AgentHighErrorRate`  | 91 s (pending ở +31 s, + `for: 1m`)   | Error rate (lên 18,9%)                                                                                  |
+| B | `MOCK_SLOW_RATE=0.3`       | `AgentHighLatencyP95` | 152 s (pending ở +31 s, + `for: 2m`)  | p50/p95/p99 theo thời gian: p95 1917 ms, p99 1983 ms nhưng avg chỉ 640 ms                             |
+| C | `LLM_MODEL=mock-llm-large` | `LLMCostBurnRateHigh` | 147 s (pending ở ~+21 s, + `for: 2m`) | Cost USD/giờ: 2,50 → 36,0 (×14,4); LLM p95 197 → 494 ms (×2,5)                                      |
+| D | `docker pause` 1 instance  | `AgentInstanceDown`   | 45 s (pending ở +15 s, + `for: 30s`)  | Instances up (2 → 1); `up{instance="172.22.0.8:8000"} = 0`                                            |
+| E | `AGENT_VERSION=v1`         | Không có              | —                                       | Retrieval hit ratio (100% → không còn series), tokens/s (input 1441 → 667), bảng version (v2 → v1) |
 
 Thời gian đo bằng script hỏi `GET /api/v1/alerts` mỗi 5 s, tính từ lúc chạy `docker compose up -d` (hoặc `docker pause`). Tải nền: Locust 30 user, 2 instance. Mỗi thí nghiệm trả `.env` về mặc định trước khi làm thí nghiệm sau.
 
 Quan sát thêm:
+
 - **Ngưỡng cost đặt thấp hơn mức chi tiêu bình thường.** Ở tải nền 30 user (~19 req/s, v2, model small) cost burn rate đã là 2,0–2,5 USD/giờ, nên `LLMCostBurnRateHigh` firing ngay cả khi chưa phá gì (và nhấp nháy quanh ngưỡng). Với thí nghiệm C, thời gian 147 s vì vậy không "sạch". Production cần đặt ngưỡng theo baseline thực tế (vd 2–3× chi phí bình thường) hoặc theo budget/ngày.
 - **Trong B, cost alert tự tắt:** request chậm → user Locust (vòng kín) gửi ít request hơn → tiền đốt chậm hơn. Một sự cố latency có thể "làm đẹp" một metric khác.
 - **Trong D:** Nginx log 29 lỗi `504` trong 2 phút pause, nhưng error rate do agent tự đo chỉ 0,7% (panel xanh), vì request timeout ở Nginx chưa bao giờ được agent xử lý xong. Cần giám sát ở tầng load balancer hoặc synthetic check từ ngoài.
@@ -129,6 +130,7 @@ Quan sát thêm:
 **Thí nghiệm E không làm alert nào firing. Bạn sẽ phát hiện loại sự cố này trong production bằng cách nào?**
 
 Đây là lỗi chất lượng, không phải lỗi hạ tầng: request vẫn 200, nhanh hơn, rẻ hơn — mọi Golden Signal đều "đẹp". Cách phát hiện:
+
 1. **Chặn trước khi deploy:** chạy eval golden dataset trong CI (Mục 3: v1 chỉ 4,35% → quality gate FAIL, exit code 1), nên bản v1 không được merge/deploy.
 2. **Giám sát sau khi deploy:** chạy eval định kỳ (synthetic) trên production và đẩy accuracy thành metric để alert; alert theo **metric hành vi** như retrieval hit ratio giảm về 0, tokens/request giảm đột ngột, hoặc `agent_info` version đổi ngoài lịch release.
 3. **Tín hiệu người dùng:** tỉ lệ thumbs-down/feedback, LLM-as-judge chấm mẫu ngẫu nhiên traffic thật.
@@ -165,10 +167,10 @@ POST /ask                    1718.0 ms  100%
 
 ## 5. Benchmark scaling (production, Locust headless, 100 users, 2 phút)
 
-| Số instance | RPS | p50 (ms) | p95 (ms) | p99 (ms) | Failures |
-|---|---|---|---|---|---|
-| 1 | 59.99 | 190 | 230 | 1700 | 71 / 7149 (0,99%) |
-| 3 | 60.24 | 190 | 220 | 1700 | 65 / 7181 (0,91%) |
+| Số instance | RPS   | p50 (ms) | p95 (ms) | p99 (ms) | Failures          |
+| ------------ | ----- | -------- | -------- | -------- | ----------------- |
+| 1            | 59.99 | 190      | 230      | 1700     | 71 / 7149 (0,99%) |
+| 3            | 60.24 | 190      | 220      | 1700     | 65 / 7181 (0,91%) |
 
 Nguồn: dòng `POST /ask` trong `benchmark-results/scale_1_stats.csv` và `scale_3_stats.csv` (Locust headless `-u 100 -r 10 -t 2m`). Locust làm tròn percentile theo bucket (190, 220, 1700…). Failures đều là `503` do `MOCK_ERROR_RATE=1%`.
 
@@ -177,6 +179,7 @@ Nguồn: dòng `POST /ask` trong `benchmark-results/scale_1_stats.csv` và `scal
 **Giải thích kết quả:** Scale có cải thiện p95 không? Nút thắt nằm ở đâu?
 
 **Không** — RPS (59,99 → 60,24) và p95 (230 → 220 ms) gần như không đổi. Hai lý do:
+
 1. **Tải bị giới hạn ở phía client, không phải server.** Locust là tải vòng kín: mỗi user chờ `between(0.5, 2)` giây (TB 1,25 s) giữa các request, nên 100 user tạo tối đa ≈ 100 / (1,25 + 0,23) ≈ 67 req/s — đúng bằng tổng RPS đo được (66,4 gồm cả `/health`). Lúc cao điểm chỉ có 22 request đang xử lý cùng lúc trên cả hệ thống, 1 instance chưa bão hoà, nên thêm instance không có gì để "gánh" thêm.
 2. **Nút thắt latency là LLM.** Mỗi request phải chờ mock LLM ~200 ms (98% thời gian trace, Mục 4.3); scale ngang chia tải nhưng không làm một lần gọi LLM nhanh hơn, và p99 1700 ms là tail latency của LLM ở cả hai cấu hình.
 
@@ -187,9 +190,19 @@ Scale ngang chỉ cải thiện p95 khi instance thật sự quá tải (như c=
 ## 6. Kết luận
 
 - 3 điều bạn học được về benchmark & observability:
-  1. ...
-  2. ...
-  3. ...
+  1. **Đo đúng chỉ số và đúng điều kiện:** Average dễ che giấu tail latency (p99 nhảy ~1,7 s dù avg chỉ nhích nhẹ), eval nhỏ dễ bị nhiễu latency nên cần load test để đo p95/p99, và benchmark scaling phải lưu ý cơ chế vòng kín của client cũng như `--no-deps` để số instance phản ánh đúng thực tế.
+  2. **Đánh giá trade-off chất lượng, chi phí và độ trễ:** Agent v2 (retrieval + context) nâng accuracy từ 4,35% lên 91,3% (và 100% sau khi bổ sung KB cho `security-02` & `scaling-03`), đồng thời giảm cost trên mỗi câu đúng ~10,7× dù tổng token/cost cao hơn; gắn eval vào CI (`exit=1` khi fail) giúp chặn regression trước khi merge.
+  3. **Kết hợp metrics, logs, traces và alerts thay vì nhìn một tín hiệu đơn lẻ:** Trace/log giúp định vị nhanh bottleneck nằm ở upstream LLM (~98,6% thời gian span `chat mock-llm-small`) thay vì retrieval hay code agent; đồng thời cần cảnh giác điểm mù của alert (ngưỡng cost đặt thấp gây nhiễu, lỗi timeout ở Nginx/LB chưa chạm tới metric của agent, hoặc lỗi sai logic/chất lượng như v1 không kích hoạt alert hạ tầng).
 - Nếu đưa agent này lên production thật, bạn sẽ thêm metric / alert nào nữa?
 
-...
+**Metrics:**
+
+* *Edge / Load Balancer metrics* (Nginx/gateway status 502/503/504, upstream timeout/retry count) để bắt lỗi khi instance down hoặc quá tải trước khi chạm agent.
+* *Per-stage latency & token breakdown* (TTFT / time-to-first-token, retrieval latency, LLM latency, queue wait time) và *per-tenant / per-endpoint cost & token usage* để kiểm soát chi phí theo khách hàng/tác vụ.
+* *Quality & behavioral telemetry* (tỷ lệ fallback/empty retrieval, độ dài context/prompt bất thường, tỷ lệ phản hồi lỗi schema/hallucination hoặc feedback người dùng).
+
+**Alerts:**
+
+* *Gateway 5xx / 504 spike* và *SLO burn-rate alert* (multi-window burn rate theo error budget và p95/p99 thay vì ngưỡng cố định dễ báo động giả).
+* *Cost anomaly / burn-rate alert* đặt theo baseline thực tế (ví dụ > 2–3× mức trung bình theo cửa sổ trượt hoặc gần hạn mức ngân sách/ngày).
+* *Behavioral / quality drift alert* (ví dụ retrieval hit ratio hoặc độ chính xác trên bộ synthetic eval định kỳ sụt giảm đột ngột, hoặc `agent_info` version thay đổi ngoài kế hoạch release).
