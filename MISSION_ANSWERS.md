@@ -187,11 +187,26 @@ $ curl http://localhost:8000/health        # gọi thẳng agent từ host
 
 ## Part 3: Cloud Deployment
 
-### Exercise 3.1: Deploy agent Part 6
+### Exercise 3.2 (nền tảng chính): Deploy agent Part 6 lên Render
 
-- URL: _(chưa deploy — điền sau khi deploy `06-lab-complete/` lên Railway, xem `DEPLOYMENT.md`)_
+- URL: **https://production-ai-agent-si7x.onrender.com**
+- Nền tảng: Render Blueprint (`06-lab-complete/render.yaml`): web service Docker + Key Value (Redis), gói Free. Railway (Exercise 3.1) không dùng được vì tài khoản đã hết hạn dùng thử và đòi gói trả phí.
+- Chi tiết, biến môi trường và ảnh chụp: [DEPLOYMENT.md](DEPLOYMENT.md), `screenshots/dashboard.png`, `running.png`, `test.png`.
 
-### Exercise 3.2: So sánh `railway.toml` và `render.yaml` (của `06-lab-complete/`)
+4 lệnh tự kiểm của CP6:
+
+```text
+$ curl -sS -o /dev/null -w '%{http_code}\n' "$BASE/health"
+200
+$ curl -sS -o /dev/null -w '%{http_code}\n' "$BASE/ready"
+200
+$ curl -sS -o /dev/null -w '%{http_code}\n' -X POST "$BASE/ask" -H 'Content-Type: application/json' -d '{"question":"Hello"}'
+401
+$ curl -sS -o /dev/null -w '%{http_code}\n' -X POST "$BASE/ask" -H 'Content-Type: application/json' -H "X-API-Key: $AGENT_API_KEY" -d '{"question":"Hello"}'
+200
+```
+
+### Nền tảng còn lại: so sánh `railway.toml` và `render.yaml` (của `06-lab-complete/`)
 
 | | `railway.toml` | `render.yaml` |
 |---|---|---|
